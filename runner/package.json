@@ -1,0 +1,10 @@
+{
+  "name": "algo-stage-runner",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AlgoStage 多语言执行服务：Python / C / C++ / Java",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

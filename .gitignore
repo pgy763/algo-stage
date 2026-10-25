@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.shots/
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.scratch/
+preview.log
+runner/runner.log
+vite.config.js.timestamp-*.mjs
+.dbg/
+
+# 本地密钥，别提交
+.env
+runner/.env
