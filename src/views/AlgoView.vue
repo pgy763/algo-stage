@@ -101,7 +101,7 @@ const progressPct = computed(() => (total.value <= 1 ? 0 : (idx.value / (total.v
 const viewComp = computed(
   () => ({ array: ArrayView, grid: GridView, tree: TreeView, matrix: MatrixView }[algo.value?.view] || ArrayView)
 )
-const kind = computed(() => (algo.value?.id === 'n-queens' ? 'queen' : 'bfs'))
+const kind = computed(() => (algo.value?.id === 'n-queens' ? 'queen' : algo.value?.id === 'dijkstra-maze' ? 'dijkstra' : 'bfs'))
 
 function escapeHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')

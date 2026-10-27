@@ -852,6 +852,11 @@ button {
   box-shadow: inset 0 -1px 0 rgba(15, 23, 42, 0.06);
 }
 
+.gcell.swamp {
+  background: #fde68a;
+  border-color: rgba(217, 119, 6, 0.35);
+}
+
 .gcell.visited {
   background: #bfdbfe;
   border-color: rgba(59, 130, 246, 0.35);

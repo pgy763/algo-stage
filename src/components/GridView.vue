@@ -23,6 +23,14 @@
         <span class="legend-item"><i class="legend-dot" style="background: #6366f1"></i>已放置皇后</span>
         <span class="legend-item"><i class="legend-dot" style="background: #f43f5e"></i>冲突位置</span>
       </template>
+      <template v-else-if="kind === 'dijkstra'">
+        <span class="legend-item"><i class="legend-dot" style="background: #cbd5e1"></i>墙</span>
+        <span class="legend-item"><i class="legend-dot" style="background: #fde68a"></i>沼泽（通行成本 5）</span>
+        <span class="legend-item"><i class="legend-dot" style="background: #bfdbfe"></i>已确定最短距离</span>
+        <span class="legend-item"><i class="legend-dot" style="background: #7dd3fc"></i>候选（在优先队列里）</span>
+        <span class="legend-item"><i class="legend-dot" style="background: #fbbf24"></i>当前</span>
+        <span class="legend-item"><i class="legend-dot" style="background: #10b981"></i>最短路径</span>
+      </template>
       <template v-else>
         <span class="legend-item"><i class="legend-dot" style="background: #cbd5e1"></i>墙</span>
         <span class="legend-item"><i class="legend-dot" style="background: #bfdbfe"></i>已访问</span>
@@ -74,6 +82,8 @@ function classOf(v, idx) {
       return 'frontier'
     case 6:
       return 'queen'
+    case 7:
+      return 'swamp'
     default:
       return ''
   }
