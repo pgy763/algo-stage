@@ -6,8 +6,7 @@
 
 **支持 5 种语言（JavaScript / Python / C / C++ / Java）× 5 种数据结构形态（数组 / 字符串 / 矩阵 / 二叉树 / 链表）**
 
-<!-- 部署后把下面这行换成你的在线地址 -->
-<!-- 🔗 在线体验：https://你的用户名.github.io/algo-stage/ -->
+🔗 **在线体验：<https://pgy763.github.io/algo-stage/>**（GitHub Pages 自动部署，纯静态、免安装）
 
 ![首页](docs/screenshots/home.png)
 
@@ -291,7 +290,7 @@ LLM_BASE_URL=https://你的服务/compatible-mode/v1
 ## 快速开始
 
 ```bash
-git clone https://github.com/你的用户名/algo-stage.git
+git clone https://github.com/pgy763/algo-stage.git
 cd algo-stage
 npm install
 npm run dev          # http://localhost:5175
