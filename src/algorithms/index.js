@@ -2,7 +2,10 @@ import bubble from './bubble.js'
 import quick from './quick.js'
 import merge from './merge.js'
 import binarySearch from './binarySearch.js'
+import slidingWindow from './slidingWindow.js'
+import monotonicStack from './monotonicStack.js'
 import bfs from './bfs.js'
+import dijkstra from './dijkstra.js'
 import treeTraversal from './treeTraversal.js'
 import nqueens from './nqueens.js'
 import lcs from './lcs.js'
@@ -13,8 +16,11 @@ export const algorithms = [
   quick,
   merge,
   binarySearch,
-  treeTraversal,
+  slidingWindow,
+  monotonicStack,
   bfs,
+  dijkstra,
+  treeTraversal,
   nqueens,
   lcs
 ]

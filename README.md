@@ -49,6 +49,9 @@ AlgoStage 把执行过程摊开：左边是代码，**当前执行到哪一行�
 | 归并排序 | 排序 | 数组 + 缓冲区 | O(n log n) |
 | 二分查找 | 查找 | 数组 + 指针 | O(log n) |
 | 二叉树中序遍历 | 树 | 树 | O(n) |
+| 滑动窗口最大和 | 双指针与滑窗 | 数组 + 区间 | O(n) |
+| 柱状图最大矩形 | 栈与队列 | 数组 + 栈 | O(n) |
+| Dijkstra 最短路 | 图与搜索 | 加权网格 | O(V²) |
 | BFS 广度优先搜索 | 图与搜索 | 迷宫网格 | O(V+E) |
 | N 皇后 | 回溯 | 棋盘 | O(n!) 最坏 |
 | 最长公共子序列 | 动态规划 | DP 表 | O(m·n) |
@@ -275,9 +278,15 @@ LLM_BASE_URL=https://你的服务/compatible-mode/v1
 | --- | --- |
 | ![N皇后](docs/screenshots/n-queens.png) | ![树](docs/screenshots/tree.png) |
 
-| 最长公共子序列填表 |
+| 最长公共子序列填表 | Dijkstra 加权迷宫 |
+| --- | --- |
+| ![LCS](docs/screenshots/lcs.png) | ![Dijkstra](docs/screenshots/dijkstra.png) |
+| 黄色沼泽通行成本 5 —— 贪心就近会绕远，每次确定的是「已知距离最小」的格子 | |
+
+| 柱状图最大矩形（单调栈） |
 | --- |
-| ![LCS](docs/screenshots/lcs.png) |
+| ![单调栈](docs/screenshots/monotonic-stack.png) |
+| 柱子出栈的那一刻左右边界刚好都齐了，面积当场算完 |
 
 ## 快速开始
 
@@ -358,6 +367,12 @@ export default {
 | `nodes` `current` `visited` | - | 树视图 |
 | `rows` `badges` | `{name, vals}[]` | 链表视图（多条链 + 指针标签） |
 | `matrix` `cell` | `number[][]` / `[r,c]` | 矩阵视图（DP 表） |
+
+## 参与贡献
+
+最欢迎的贡献就是**新算法**：一个文件 + 一行注册，不需要碰框架代码。完整步骤、step 字段协议和写旁白的建议都在 [CONTRIBUTING.md](CONTRIBUTING.md)，十分钟就能上手。
+
+也欢迎 bug 报告（贴一段跑不动的代码 + 现象）和实验台能力扩展。
 
 ## 技术实现
 
