@@ -91,16 +91,15 @@ export default {
         right = mid - 1
       }
 
+      // 区间空了就没有「高亮的一段」可画：硬把 left/right 夹到数组里会画出一条倒着的带子
+      const alive = left <= right
       snap({
         line: 1,
         desc: `区间缩到 [${left}, ${right}]，${
-          left <= right ? '还有得找，继续。' : 'left 已经越过 right，说明目标不存在。'
+          alive ? '还有得找，继续。' : 'left 已经越过 right，说明目标不存在。'
         }`,
-        range: { from: Math.max(left, 0), to: Math.min(right, n - 1) },
-        pointers:
-          left <= right
-            ? [{ name: 'L', index: left }, { name: 'R', index: right }]
-            : []
+        range: alive ? { from: left, to: right } : undefined,
+        pointers: alive ? [{ name: 'L', index: left }, { name: 'R', index: right }] : []
       })
     }
 

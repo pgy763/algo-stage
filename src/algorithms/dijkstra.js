@@ -134,13 +134,13 @@ export default {
 
       grid[br][bc] = 2
       snap({
-        line: 10,
+        line: 8,
         desc: `松了 ${relaxed} 个邻居的距离。黄色沼泽 cost=5，除非绕路更贵，否则 Dijkstra 不怕走它。已确定 ${settled} 格。`
       })
     }
 
     if (!found) {
-      snap({ line: 14, desc: '终点不可达。' })
+      snap({ line: 11, desc: '终点不可达。' })
       return { steps, result: null }
     }
 
@@ -155,11 +155,11 @@ export default {
     for (let i = 0; i < path.length; i++) {
       const [r, c] = path[i]
       grid[r][c] = 4
-      snap({ line: 14, desc: i === 0 ? '从终点沿 prev 回溯最短路径。' : `回溯到 (${r}, ${c})。` })
+      snap({ line: 11, desc: i === 0 ? '从终点沿 prev 回溯最短路径。' : `回溯到 (${r}, ${c})。` })
     }
 
     snap({
-      line: 14,
+      line: 11,
       desc: `最终成本 ${dist[tr][tc]}。对比一下：这条路上沼泽多走了几步，但每步 5 的成本仍比绕远路划算 —— 这就是「带权」和「等权」的差别。`
     })
 
