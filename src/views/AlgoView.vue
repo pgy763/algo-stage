@@ -32,7 +32,7 @@
         </div>
 
         <div class="narration">
-          <div class="narration-icon">▸</div>
+          <div class="narration-icon" :title="action.label">{{ action.icon }}</div>
           <div :key="idx" class="narration-text" v-html="narration"></div>
         </div>
 
@@ -68,11 +68,24 @@
         </div>
       </div>
     </div>
+
+    <!-- 快捷键帮助（按 ? 呼出） -->
+    <div v-if="showKeys" class="keys-mask" @click.self="showKeys = false">
+      <div class="keys-panel">
+        <h3>键盘操作</h3>
+        <div class="keys-row"><kbd>←</kbd><kbd>→</kbd><span>上一步 / 下一步</span></div>
+        <div class="keys-row"><kbd>空格</kbd><span>播放 / 暂停</span></div>
+        <div class="keys-row"><kbd>?</kbd><span>打开 / 关闭这个面板</span></div>
+        <div class="keys-row"><kbd>Esc</kbd><span>关闭面板</span></div>
+        <div class="keys-tip">把带步数的链接发给同学，他打开就是同一帧 —— 进度条拖到哪，URL 就记到哪。</div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { markWatched } from '../progress.js'
 import { useRoute, useRouter } from 'vue-router'
 import { byId } from '../algorithms/index.js'
 import SoftBackground from '../components/SoftBackground.vue'
@@ -93,9 +106,41 @@ const speed = ref(700)
 const input = ref(null)
 
 let timer = null
+const showKeys = ref(false)
 
 const total = computed(() => steps.value.length)
 const current = computed(() => steps.value[idx.value] || null)
+
+// 看到最后一帧就算「已学」，首页卡片会打勾
+watch(idx, (v) => {
+  if (total.value > 1 && v >= total.value - 1 && algo.value) markWatched(algo.value.id)
+})
+
+// 动作类型徽标：让每一步「是什么性质」一眼可辨
+const action = computed(() => {
+  const st = current.value
+  if (!st) return { icon: '▸', label: '执行' }
+  if (st.action) return st.action
+  if (st.swap?.length) return { icon: '🔁', label: '交换' }
+  if (st.compare?.length) return { icon: '🔍', label: '比较' }
+  if (st.range) return { icon: '🪟', label: '窗口' }
+  if (st.cell) return { icon: '✍️', label: '填表' }
+  if (st.view === 'grid') {
+    const d = st.desc || ''
+    if (/回溯|沿 prev/.test(d)) return { icon: '↩', label: '回溯' }
+    if (/入队|邻居/.test(d)) return { icon: '➡', label: '扩散' }
+    if (/敲定|确定|最短距离/.test(d)) return { icon: '✅', label: '确定' }
+  }
+  if (st.view === 'tree') {
+    const d = st.desc || ''
+    if (/压栈/.test(d)) return { icon: '⬇', label: '压栈' }
+    if (/弹出/.test(d)) return { icon: '⬆', label: '弹出' }
+    if (/访问/.test(d)) return { icon: '✅', label: '访问' }
+    if (/比较|大小/.test(d)) return { icon: '🔍', label: '比较' }
+  }
+  if (st.sorted?.length) return { icon: '✅', label: '完成' }
+  return { icon: '▸', label: '执行' }
+})
 const progressPct = computed(() => (total.value <= 1 ? 0 : (idx.value / (total.value - 1)) * 100))
 
 const viewComp = computed(
@@ -185,6 +230,11 @@ function seek(e) {
 }
 
 function onKey(e) {
+  if (e.key === '?') {
+    showKeys.value = !showKeys.value
+    return
+  }
+  if (e.key === 'Escape') showKeys.value = false
   const tag = (e.target?.tagName || '').toLowerCase()
   if (tag === 'input' || tag === 'select' || tag === 'textarea') return
   if (e.key === 'ArrowRight') {

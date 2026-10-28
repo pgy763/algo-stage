@@ -514,12 +514,12 @@ button {
 
 .narration-icon {
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
   display: grid;
   place-items: center;
-  font-size: 12px;
+  font-size: 14px;
   background: var(--accent-soft);
   color: var(--accent);
   margin-top: 1px;
@@ -1494,6 +1494,85 @@ button {
 .finish-tag b {
   font-family: var(--mono);
   font-size: 14px;
+}
+
+
+
+/* ============ 已学标记 ============ */
+.learned-pill {
+  font-size: 12px;
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 4px 11px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.watched {
+  margin-left: auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+/* ============ 快捷键帮助面板 ============ */
+.keys-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  display: grid;
+  place-items: center;
+  z-index: 80;
+}
+
+.keys-panel {
+  width: 360px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 22px 24px;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.22);
+  animation: pop 0.25s ease;
+}
+
+.keys-panel h3 {
+  font-size: 16px;
+  margin-bottom: 14px;
+}
+
+.keys-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  font-size: 13.5px;
+  color: #334155;
+}
+
+.keys-row kbd {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: #f1f5f9;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  padding: 3px 8px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.keys-tip {
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--dim);
 }
 
 /* ============ 响应式 ============ */

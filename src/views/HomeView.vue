@@ -59,6 +59,7 @@
       <div class="section-title">
         <h2>全部算法</h2>
         <span>{{ filtered.length }} 个 · 排序 / 查找 / 树 / 搜索 / 回溯 / 动态规划</span>
+        <span class="learned-pill" title="看到最后一帧就算学完">已学 {{ watchedCount }} / {{ algorithms.length }}</span>
       </div>
 
       <div class="filters">
@@ -79,6 +80,7 @@
           <div class="algo-card-head">
             <span class="tag">{{ a.category }}</span>
             <span class="tag level">{{ a.level }}</span>
+            <span v-if="watched.has(a.id)" class="watched" title="已看完">✓</span>
           </div>
           <h3>{{ a.name }}</h3>
           <p>{{ a.summary }}</p>
@@ -100,10 +102,13 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { algorithms, categories } from '../algorithms/index.js'
+import { loadWatched } from '../progress.js'
 import SoftBackground from '../components/SoftBackground.vue'
 import { currentUser } from '../store/auth.js'
 
 const activeCat = ref('全部')
+const watched = ref(loadWatched())
+const watchedCount = computed(() => algorithms.filter((a) => watched.value.has(a.id)).length)
 const user = ref(currentUser())
 const filtered = computed(() =>
   activeCat.value === '全部' ? algorithms : algorithms.filter((a) => a.category === activeCat.value)
