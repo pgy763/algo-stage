@@ -11,6 +11,11 @@ updates:
     groups:
       dev-dependencies:
         dependency-type: development
+    ignore:
+      # vue-router 5 是跨大版本：npm ci 直接解析失败，属于要单独开分支评估的迁移，
+      # 别让它在每周的自动 PR 里反复出现。真要升的时候手动做。
+      - dependency-name: 'vue-router'
+        update-types: ['version-update:semver-major']
 
   # Actions 本身也会过期
   - package-ecosystem: github-actions
