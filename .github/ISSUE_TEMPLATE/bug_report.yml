@@ -1,0 +1,54 @@
+name: Bug 报告
+description: 某个算法画错了、页面报错、代码实验台跑不出结果
+title: '[Bug] '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        谢谢反馈！请尽量把「在哪个页面 / 看到什么 / 预期什么」写清楚，
+        能省掉好几轮来回 —— 尤其是**哪一帧**不对，因为我按帧修。
+
+  - type: input
+    id: page
+    attributes:
+      label: 出问题的页面
+      description: 直接把地址栏复制过来（可以用 `?s=` 带上具体是第几步）
+      placeholder: https://pgy763.github.io/algo-stage/#/algo/bubble-sort?s=12
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: 现象是什么
+      description: 哪一帧、哪两个数/哪一行代码看起来不对？有截图最好，直接拖进来
+      placeholder: |
+        第 12 帧时 i=3，但高亮的格子是 [5]，而且旁白说...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expect
+    attributes:
+      label: 你本来预期看到什么
+    validations:
+      required: false
+
+  - type: input
+    id: env
+    attributes:
+      label: 浏览器 / 系统
+      placeholder: Chrome 130 / Windows 11
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: selfcheck
+    attributes:
+      label: 自查
+      options:
+        - label: 我刷新过页面，看的是最新版本
+          required: true
+        - label: 如果是「代码实验台」的问题，我把贴进去的代码也写在下面了
+          required: false

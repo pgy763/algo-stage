@@ -1,0 +1,61 @@
+name: 新算法
+description: 想让某个算法也被演出来（也欢迎直接提 PR，见 CONTRIBUTING.md）
+title: '[算法] '
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        加一个算法只需要**一个文件 + 一行注册**，不需要碰框架代码。
+        具体怎么加、`run()` 要产出什么，见 [CONTRIBUTING.md](../../blob/main/CONTRIBUTING.md)。
+
+  - type: input
+    id: name
+    attributes:
+      label: 算法名
+      placeholder: 拓扑排序 / 01 背包 / Manacher
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 属于哪一类
+      options:
+        - 排序
+        - 查找
+        - 树
+        - 图与搜索
+        - 栈与队列
+        - 双指针与滑窗
+        - 回溯
+        - 动态规划
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: 为什么值得可视化
+      description: 哪一步最容易看糊涂？如果只是想"多一个算法"，说服力会弱一些
+      placeholder: 回溯撤销那一步用文字很难讲清，画出来一眼就懂了
+    validations:
+      required: true
+
+  - type: textarea
+    id: ref
+    attributes:
+      label: 参考资料（可选）
+      description: 伪代码、题目链接、你打算怎么设计步骤
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: willing
+    attributes:
+      label: 你愿意自己提 PR 吗
+      options:
+        - label: 愿意，我先写一版，让维护者 review
+          required: false
+        - label: 只提想法，实现交给别人
+          required: false
