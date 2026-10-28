@@ -12,7 +12,7 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
-const props = defineProps({
+defineProps({
   /** 整体浓度：首页 1，内容页 0.5 左右 */
   intensity: { type: Number, default: 1 }
 })
@@ -63,6 +63,7 @@ function resize() {
   canvas.value.style.height = h + 'px'
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   initDots()
+  if (reducedMotion?.matches) drawStatic()
 }
 
 function tick() {
@@ -140,24 +141,67 @@ function onLeave() {
   mouse.y = -9999
 }
 
+/**
+ * mouseout 会在「离开任意一个子元素」时冒泡上来触发，
+ * 鼠标划过按钮都会把引力关掉一次，粒子会一顿一顿的。
+ * 只有真正离开窗口（relatedTarget 为空、且没有落在别的元素上）才算离开。
+ */
+function onOut(e) {
+  if (!e.relatedTarget && !e.toElement) onLeave()
+}
+
+/** 系统开了「减弱动态效果」就只画一帧静态粒子，不跑 rAF */
+const reducedMotion =
+  typeof window !== 'undefined' && window.matchMedia
+    ? window.matchMedia('(prefers-reduced-motion: reduce)')
+    : null
+
 function onVisibility() {
   if (document.hidden) {
     running = false
     cancelAnimationFrame(raf)
+  } else if (!running && !reducedMotion?.matches) {
+    running = true
+    tick()
+  }
+}
+
+function onMotionPrefChange() {
+  if (reducedMotion?.matches) {
+    running = false
+    cancelAnimationFrame(raf)
+    drawStatic()
   } else if (!running) {
     running = true
     tick()
   }
 }
 
+/** 静态版：画一帧就停 */
+function drawStatic() {
+  if (!ctx) return
+  ctx.clearRect(0, 0, w, h)
+  for (const p of dots) {
+    ctx.beginPath()
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+    ctx.fillStyle = `rgba(${p.c}, ${p.a})`
+    ctx.fill()
+  }
+}
+
 onMounted(() => {
   ctx = canvas.value.getContext('2d')
   resize()
-  tick()
+  if (reducedMotion?.matches) {
+    drawStatic()
+  } else {
+    tick()
+  }
   window.addEventListener('resize', resize)
   window.addEventListener('mousemove', onMove)
-  window.addEventListener('mouseout', onLeave)
+  window.addEventListener('mouseout', onOut)
   document.addEventListener('visibilitychange', onVisibility)
+  reducedMotion?.addEventListener?.('change', onMotionPrefChange)
 })
 
 onBeforeUnmount(() => {
@@ -165,8 +209,9 @@ onBeforeUnmount(() => {
   cancelAnimationFrame(raf)
   window.removeEventListener('resize', resize)
   window.removeEventListener('mousemove', onMove)
-  window.removeEventListener('mouseout', onLeave)
+  window.removeEventListener('mouseout', onOut)
   document.removeEventListener('visibilitychange', onVisibility)
+  reducedMotion?.removeEventListener?.('change', onMotionPrefChange)
 })
 </script>
 
@@ -279,5 +324,12 @@ canvas {
   background-size: 46px 46px;
   mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, #000 5%, transparent 72%);
   -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, #000 5%, transparent 72%);
+}
+
+/* 系统偏好「减弱动态效果」时，四个光斑也别再飘了（JS 那边粒子同样只画一帧） */
+@media (prefers-reduced-motion: reduce) {
+  .blob {
+    animation: none !important;
+  }
 }
 </style>

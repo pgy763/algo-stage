@@ -253,6 +253,7 @@ button {
 
 .algo-card {
   position: relative;
+  display: block;
   padding: 20px;
   border-radius: var(--radius);
   background: #ffffff;
@@ -261,12 +262,21 @@ button {
   cursor: pointer;
   transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  /* 卡片是 <a>：别继承链接的蓝色下划线，但保留键盘焦点圈 */
+  color: inherit;
+  text-decoration: none;
 }
 
 .algo-card:hover {
   transform: translateY(-4px);
   border-color: rgba(34, 211, 238, 0.45);
   box-shadow: 0 14px 34px rgba(15, 23, 42, 0.1), 0 0 0 1px rgba(34, 211, 238, 0.15);
+}
+
+.algo-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-color: rgba(34, 211, 238, 0.45);
 }
 
 .algo-card-head {
@@ -644,9 +654,32 @@ button {
   height: 5px;
   border-radius: 3px;
   background: rgba(15, 23, 42, 0.09);
-  overflow: hidden;
   cursor: pointer;
   position: relative;
+  /* 触屏拖动时别让页面跟着滚 */
+  touch-action: none;
+}
+
+/* 上下各扩 9px 的热区：视觉上还是那条细线，但好点好拖。
+   注意父级不能 overflow:hidden，否则热区会被裁掉。 */
+.progress-track::before {
+  content: '';
+  position: absolute;
+  inset: -9px 0;
+}
+
+.progress-track:hover,
+.progress-track:focus-visible {
+  background: rgba(15, 23, 42, 0.14);
+}
+
+.progress-track:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.progress-track:active {
+  cursor: grabbing;
 }
 
 .progress-fill {
@@ -654,6 +687,11 @@ button {
   border-radius: 3px;
   background: linear-gradient(90deg, #22d3ee, #6366f1);
   transition: width 0.18s linear;
+}
+
+/* 拖的时候不要过渡，否则进度条会慢半拍跟在鼠标后面 */
+.progress-track:active .progress-fill {
+  transition: none;
 }
 
 .step-count {

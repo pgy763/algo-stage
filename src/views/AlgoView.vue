@@ -53,7 +53,16 @@
           </div>
 
           <div class="progress-wrap">
-            <div class="progress-track" @click="seek">
+            <div
+              class="progress-track"
+              role="slider"
+              tabindex="0"
+              aria-label="播放进度"
+              aria-valuemin="1"
+              :aria-valuemax="total"
+              :aria-valuenow="idx + 1"
+              @pointerdown="onPointerDown"
+            >
               <div class="progress-fill" :style="{ width: progressPct + '%' }"></div>
             </div>
             <span class="step-count">{{ idx + 1 }} / {{ total }}</span>
@@ -94,6 +103,7 @@ import ArrayView from '../components/ArrayView.vue'
 import GridView from '../components/GridView.vue'
 import TreeView from '../components/TreeView.vue'
 import MatrixView from '../components/MatrixView.vue'
+import { useScrubber } from '../composables/useScrubber.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -203,6 +213,7 @@ function tick() {
       tick()
     } else {
       playing.value = false
+      syncUrl()
     }
   }, speed.value)
 }
@@ -210,6 +221,8 @@ function tick() {
 function pause() {
   playing.value = false
   clearTimeout(timer)
+  // 播放时不动 URL，停下来才把「我看到哪了」写进去
+  syncUrl()
 }
 
 function prev() {
@@ -222,21 +235,28 @@ function next() {
   if (idx.value < total.value - 1) idx.value++
 }
 
-function seek(e) {
-  const rect = e.currentTarget.getBoundingClientRect()
-  const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width))
-  idx.value = Math.round(ratio * (total.value - 1))
+/** 进度条拖到 r（0~1）就是第几帧 */
+function seekRatio(r) {
+  if (total.value <= 1) return
+  idx.value = Math.round(r * (total.value - 1))
   pause()
 }
 
+const { onPointerDown } = useScrubber(seekRatio)
+
 function onKey(e) {
+  const tag = (e.target?.tagName || '').toLowerCase()
+  const typing = tag === 'input' || tag === 'select' || tag === 'textarea' || e.target?.isContentEditable
+  if (typing) return
+
   if (e.key === '?') {
     showKeys.value = !showKeys.value
     return
   }
-  if (e.key === 'Escape') showKeys.value = false
-  const tag = (e.target?.tagName || '').toLowerCase()
-  if (tag === 'input' || tag === 'select' || tag === 'textarea') return
+  if (e.key === 'Escape') {
+    showKeys.value = false
+    return
+  }
   if (e.key === 'ArrowRight') {
     e.preventDefault()
     next()
@@ -253,32 +273,49 @@ watch(speed, () => {
   if (playing.value) tick()
 })
 
-// 保持 URL 与当前步骤同步，方便分享到某一步
-watch(idx, (v) => {
-  if (!algo.value) return
-  const q = { ...route.query, s: String(v + 1) }
-  router.replace({ query: q }).catch(() => {})
-})
+// 保持 URL 与当前步骤同步，方便分享到某一步。
+// 播放过程中一帧一次 router.replace 太吵（4× 速每秒五次），所以播放时不写，
+// 停下来才写一次；回到第 1 步就把 s 摘掉，别把"上一集"的步数带进下一集。
+let urlTimer = null
+function syncUrl() {
+  clearTimeout(urlTimer)
+  urlTimer = setTimeout(() => {
+    if (!algo.value || playing.value) return
+    const q = { ...route.query }
+    if (idx.value > 0) q.s = String(idx.value + 1)
+    else delete q.s
+    if ((route.query.s || '') === (q.s || '')) return
+    router.replace({ query: q }).catch(() => {})
+  }, 150)
+}
+watch(idx, syncUrl)
+
+/** 从 ?s= 还原到某一帧，非法值就落回第一帧 */
+function restoreStep() {
+  const s = Number(route.query.s || 1)
+  if (Number.isFinite(s) && s > 1) idx.value = Math.min(s - 1, steps.value.length - 1)
+  else idx.value = 0
+}
 
 watch(
   () => route.params.id,
   () => {
     input.value = null
-    build(null)
-    const s = Number(route.query.s || 1)
-    if (s > 1) idx.value = Math.min(s - 1, steps.value.length - 1)
+    // 换算法要重挑速度：从冒泡切到 N 皇后，1× 速能看半小时
+    build(null, true)
+    restoreStep()
   }
 )
 
 onMounted(() => {
   build(null, true)
-  const s = Number(route.query.s || 1)
-  if (s > 1) idx.value = Math.min(s - 1, steps.value.length - 1)
+  restoreStep()
   window.addEventListener('keydown', onKey)
 })
 
 onBeforeUnmount(() => {
   pause()
+  clearTimeout(urlTimer)
   window.removeEventListener('keydown', onKey)
 })
 </script>

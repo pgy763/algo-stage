@@ -20,7 +20,7 @@
           </h1>
           <p>
             每一行代码、每一次交换、每一个指针移动，都在这块舞台上实时演给你看。<br />
-            8 个经典算法，支持单步、变速、随时回退 —— 看不懂就退回去再看一遍。
+            {{ algorithms.length }} 个经典算法，支持单步、变速、随时回退 —— 看不懂就退回去再看一遍。
           </p>
 
           <div class="hero-actions">
@@ -68,6 +68,7 @@
           :key="c"
           class="tag"
           :class="{ active: activeCat === c }"
+          :aria-pressed="activeCat === c"
           style="cursor: pointer; padding: 5px 13px; font-size: 12.5px"
           @click="activeCat = c"
         >
@@ -76,7 +77,14 @@
       </div>
 
       <div class="algo-grid">
-        <div v-for="a in filtered" :key="a.id" class="algo-card" @click="$router.push(`/algo/${a.id}`)">
+        <!-- 用 router-link 而不是 div+click：Tab 能选中、回车能进、读屏能念 -->
+        <router-link
+          v-for="a in filtered"
+          :key="a.id"
+          :to="`/algo/${a.id}`"
+          class="algo-card"
+          :aria-label="`${a.name}（${a.category}，${a.level}）：${a.summary}`"
+        >
           <div class="algo-card-head">
             <span class="tag">{{ a.category }}</span>
             <span class="tag level">{{ a.level }}</span>
@@ -88,7 +96,7 @@
             <span class="complexity">{{ a.complexity.time }}</span>
             <span style="margin-left: auto; font-size: 12px; color: var(--accent)">进去看看 →</span>
           </div>
-        </div>
+        </router-link>
       </div>
 
       <footer class="home-foot">

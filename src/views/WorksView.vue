@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import SoftBackground from '../components/SoftBackground.vue'
 import { currentUser, listWorks, logout, removeWork, exportAll, importAll } from '../store/auth.js'
@@ -103,11 +103,16 @@ function doLogout() {
 
 function exportJson() {
   const blob = new Blob([exportAll()], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
+  a.href = url
   a.download = `algostage-backup-${new Date().toISOString().slice(0, 10)}.json`
+  // 有些浏览器要求链接在文档里才肯触发下载
+  document.body.appendChild(a)
   a.click()
-  URL.revokeObjectURL(a.href)
+  a.remove()
+  // 立刻 revoke 会把还没开始的下载掐掉（Safari / Firefox 常见），等一会儿再回收
+  setTimeout(() => URL.revokeObjectURL(url), 2000)
   msg.value = '已导出，换设备时用「导入」恢复'
   setTimeout(() => (msg.value = ''), 3000)
 }
@@ -117,8 +122,13 @@ async function importJson(e) {
   if (!file) return
   try {
     const text = await file.text()
+    // 是合并不是覆盖，还是问一句，免得手滑
+    if (!confirm('导入会把备份里的账号和作品合并进来（已有的不会被删）。继续？')) {
+      e.target.value = ''
+      return
+    }
     const r = importAll(text)
-    msg.value = `导入成功：${r.users} 个账号，${r.works} 个作品`
+    msg.value = r.users || r.works ? `导入完成：新增 ${r.users} 个账号、${r.works} 个作品` : '这个备份里的内容都已经存在了'
     load()
   } catch (err) {
     msg.value = '导入失败：' + err.message

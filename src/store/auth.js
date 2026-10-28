@@ -105,8 +105,9 @@ export function saveWork(userId, { title, lang, code, input, entry }) {
     createdAt: Date.now()
   }
   all.push(work)
-  // 只留最近 200 个，避免 localStorage 撑爆
-  const trimmed = all.slice(-200)
+  // 只留最近 200 个，避免 localStorage 撑爆。
+  // 按 createdAt 排序再截断：导入进来的作品不一定是按时间顺序插进来的
+  const trimmed = [...all].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)).slice(-200)
   write(KEY_WORKS, trimmed)
   return work
 }
@@ -135,10 +136,44 @@ export function exportAll() {
   )
 }
 
+/**
+ * 导入备份。
+ *
+ * 以前是整表覆盖：导入一份别人的备份，你自己的账号和作品就没了。
+ * 现在按 id 合并 —— 只补新的，不删已有的；返回到底新增了多少。
+ */
 export function importAll(json) {
-  const data = JSON.parse(json)
-  if (!data || !Array.isArray(data.users)) throw new Error('文件格式不对')
-  write(KEY_USERS, data.users)
-  write(KEY_WORKS, data.works || [])
-  return { users: data.users.length, works: (data.works || []).length }
+  let data
+  try {
+    data = JSON.parse(json)
+  } catch {
+    throw new Error('这不是一个合法的 JSON 文件')
+  }
+  if (!data || !Array.isArray(data.users)) throw new Error('文件格式不对（缺少 users）')
+
+  const users = listUsers()
+  const works = read(KEY_WORKS, [])
+  const userIds = new Set(users.map((u) => u && u.id).filter(Boolean))
+  const workIds = new Set(works.map((w) => w && w.id).filter(Boolean))
+
+  let addedUsers = 0
+  for (const u of data.users) {
+    if (!u || typeof u.id !== 'string' || typeof u.name !== 'string' || userIds.has(u.id)) continue
+    users.push(u)
+    userIds.add(u.id)
+    addedUsers++
+  }
+
+  let addedWorks = 0
+  const incoming = Array.isArray(data.works) ? data.works : []
+  for (const w of incoming) {
+    if (!w || typeof w.id !== 'string' || workIds.has(w.id)) continue
+    works.push(w)
+    workIds.add(w.id)
+    addedWorks++
+  }
+
+  write(KEY_USERS, users)
+  write(KEY_WORKS, works.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)).slice(-200))
+  return { users: addedUsers, works: addedWorks, totalUsers: users.length }
 }
