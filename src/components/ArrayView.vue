@@ -19,7 +19,7 @@
     </div>
 
     <div v-if="aux && aux.length" class="aux-row">
-      <span class="aux-label">缓冲区</span>
+      <span class="aux-label">{{ auxLabel }}</span>
       <div v-for="(v, i) in aux" :key="'a' + i" class="aux-cell">{{ v }}</div>
     </div>
   </div>
@@ -37,6 +37,9 @@ const barStyle = ref(null)
 
 const array = computed(() => props.step?.array || [])
 const aux = computed(() => props.step?.aux || null)
+// 辅助数组默认是归并排序那种「缓冲区」，但不是所有算法都这么叫：
+// LIS 想写 dp、KMP 想写 fail 表，所以允许每帧自己带一个标签
+const auxLabel = computed(() => props.step?.auxLabel || '缓冲区')
 
 const cellSize = computed(() => {
   const n = array.value.length
