@@ -3,6 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # PR 上也要跑 lint / test，但只在 main 上部署
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -11,7 +14,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  # 按 ref 分组：PR 的检查不会把正在进行的部署顶掉
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -59,6 +63,8 @@ jobs:
 
   deploy:
     needs: build
+    # PR 只跑检查，不发布；main 上的 push 才真的部署
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

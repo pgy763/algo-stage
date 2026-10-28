@@ -11,22 +11,32 @@ import dijkstra from './dijkstra.js'
 import treeTraversal from './treeTraversal.js'
 import nqueens from './nqueens.js'
 import lcs from './lcs.js'
+import heap from './heap.js'
+import unionFind from './unionFind.js'
+import lis from './lis.js'
+import editDistance from './editDistance.js'
+import trie from './trie.js'
 
 /** 新算法只要在这里注册一下就能出现在首页 */
 export const algorithms = [
   bubble,
   quick,
   merge,
+  heap,
   binarySearch,
   slidingWindow,
   monotonicStack,
   bst,
+  treeTraversal,
+  trie,
   kmp,
   bfs,
   dijkstra,
-  treeTraversal,
   nqueens,
-  lcs
+  lcs,
+  lis,
+  editDistance,
+  unionFind
 ]
 
 export function byId(id) {

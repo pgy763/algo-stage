@@ -44,8 +44,10 @@ const edges = computed(() => {
   const list = []
   const visited = props.step?.visited || []
   for (const n of nodes.value) {
-    for (const child of [n.left, n.right]) {
-      if (child < 0) continue
+    // 二叉树用 left/right；多叉树（Trie、N 叉树）用 children
+    const kids = Array.isArray(n.children) ? n.children : [n.left, n.right]
+    for (const child of kids) {
+      if (child == null || child < 0) continue
       const c = nodes.value[child]
       if (!c) continue
       list.push({
