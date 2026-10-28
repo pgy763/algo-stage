@@ -7,6 +7,30 @@ import { instrumentBraced, findFunctions, pickEntry } from './instr.js'
 
 const exec = promisify(execFile)
 
+let cachedJava = null
+
+/**
+ * 找 javac。以前 /api/env 直接把 java.ok 写死成 true，
+ * 没装 JDK 的机器上「Java」也是亮的，点了才报错 —— 现在真问一遍。
+ */
+export async function findJava() {
+  if (cachedJava) return cachedJava
+  const candidates = [process.env.JAVAC_PATH, 'javac'].filter(Boolean)
+  for (const bin of candidates) {
+    try {
+      const r = await exec(bin, ['-version'], { timeout: 15000 })
+      // JDK 9+ 输出到 stdout，老版本走 stderr，两边都看
+      const text = `${r.stdout || ''}${r.stderr || ''}`.trim()
+      const version = (text.split('\n')[0] || '').trim() || 'javac'
+      cachedJava = { bin, version }
+      return cachedJava
+    } catch {
+      /* 试下一个 */
+    }
+  }
+  return null
+}
+
 /** 先按 UTF-8 读，出现替换字符就说明其实是 GBK */
 function decodeAuto(buf) {
   if (!buf || !buf.length) return ''
@@ -310,6 +334,17 @@ function gridLiteral(grid) {
 }
 
 export async function runJava({ code, input, inputKind, inputRaw, extras, entry, dir }) {
+  const javac = await findJava()
+  if (!javac) {
+    return {
+      ok: false,
+      error:
+        '没找到 javac（JDK）。装一个 JDK 17+ 就能用：\n' +
+        '  winget install Microsoft.OpenJDK.21\n' +
+        '装完重启 runner 即可（或设置环境变量 JAVAC_PATH 指向 javac.exe）。'
+    }
+  }
+
   const classMatch = code.match(/(?:^|\n)\s*(?:public\s+)?(?:final\s+)?class\s+(\w+)/)
   const hasClass = !!classMatch
   const className = hasClass ? classMatch[1] : 'UserCode'
@@ -382,11 +417,11 @@ export async function runJava({ code, input, inputKind, inputRaw, extras, entry,
   ]
 
   try {
-    await exec('javac', compileArgs, { cwd: dir, timeout: 60000, maxBuffer: 4 * 1024 * 1024 })
+    await exec(javac.bin, compileArgs, { cwd: dir, timeout: 60000, maxBuffer: 4 * 1024 * 1024 })
   } catch {
     let msg = ''
     try {
-      const rb = await exec('javac', compileArgs, {
+      const rb = await exec(javac.bin, compileArgs, {
         cwd: dir,
         timeout: 60000,
         encoding: 'buffer',

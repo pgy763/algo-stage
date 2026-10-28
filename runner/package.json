@@ -5,6 +5,8 @@
   "type": "module",
   "description": "AlgoStage 多语言执行服务：Python / C / C++ / Java",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node test-guards.mjs",
+    "test:samples": "node test-samples.mjs"
   }
 }
