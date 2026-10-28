@@ -4,6 +4,8 @@ import merge from './merge.js'
 import binarySearch from './binarySearch.js'
 import slidingWindow from './slidingWindow.js'
 import monotonicStack from './monotonicStack.js'
+import bst from './bst.js'
+import kmp from './kmp.js'
 import bfs from './bfs.js'
 import dijkstra from './dijkstra.js'
 import treeTraversal from './treeTraversal.js'
@@ -18,6 +20,8 @@ export const algorithms = [
   binarySearch,
   slidingWindow,
   monotonicStack,
+  bst,
+  kmp,
   bfs,
   dijkstra,
   treeTraversal,
