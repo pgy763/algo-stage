@@ -33,32 +33,11 @@ function humanCond(cond) {
   return humanExpr(cond).replace(/\s*&&\s*/g, ' 且 ').replace(/\s*\|\|\s*/g, ' 或 ')
 }
 
-function fmtVal(v) {
-  if (v === null || v === undefined) return 'null'
-  if (typeof v === 'string') return `"${v}"`
-  if (Array.isArray(v)) return `[${v.slice(0, 8).join(', ')}${v.length > 8 ? ', …' : ''}]`
-  if (typeof v === 'object') return '…'
-  return String(v)
-}
-
-/** 尽量把左值算成当前值：`right` 直接查，`left[i]` 用当前 i 查 */
-function lookupValue(step, target) {
-  const vars = step?.vars || {}
-  const t = target.trim()
-  if (/^[A-Za-z_]\w*$/.test(t)) return t in vars ? vars[t] : null
-
-  const m = t.match(/^([A-Za-z_]\w*)\s*\[\s*([A-Za-z_]\w*|\d+)\s*\]$/)
-  if (m && Array.isArray(vars[m[1]])) {
-    const idx = /^\d+$/.test(m[2]) ? Number(m[2]) : vars[m[2]]
-    if (Number.isInteger(idx)) {
-      const arr = vars[m[1]]
-      return idx >= 0 && idx < arr.length ? arr[idx] : null
-    }
-  }
-  return null
-}
-
-export function explainLine(rawLine, step = {}, opts = {}) {
+/**
+ * 只翻译「这一行在做什么」，所以当前变量和语言参数暂时用不上。
+ * 留着这两个形参是为了让调用方签名稳定（以后想接算法级解说时从这里往下传）。
+ */
+export function explainLine(rawLine, _step = {}, _opts = {}) {
   const line = stripComment(rawLine || '')
   if (!line) return ''
 

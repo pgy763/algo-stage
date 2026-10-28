@@ -89,7 +89,7 @@ export default {
     const path = []
     let i = m
     let j = n
-    let chars = []
+    const chars = []
     while (i > 0 && j > 0) {
       path.push([i, j])
       if (s1[i - 1] === s2[j - 1]) {

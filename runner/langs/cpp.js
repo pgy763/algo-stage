@@ -181,7 +181,7 @@ function argExpr(param, idx, extras = {}) {
 function buildMain(fns, entry, data, extras) {
   const fn = fns.find((f) => f.name === entry)
   const params = fn ? fn.params : []
-  const { nums, grid, text, usingVector } = data
+  const { nums, grid, text } = data
 
   const len = nums ? nums.length : text != null ? text.length : grid ? grid.length : 0
   const needsTree = params.some(isTreeNode)
@@ -250,7 +250,6 @@ export async function runCpp({ code, input, inputKind, extras, entry, dir, lang 
   const nums = kind === 'array' ? (Array.isArray(input) ? input : []) : null
   const grid = kind === 'matrix' ? (Array.isArray(input) ? input : []) : null
   const text = kind === 'string' ? String(input ?? '') : null
-  const usingVector = /vector\s*</.test(code)
 
   // 输入形态和参数类型对不上时提前报错（C++ 里空数组会静默跑完，很难查）
   {
@@ -325,7 +324,7 @@ export async function runCpp({ code, input, inputKind, extras, entry, dir, lang 
 using namespace std;
 ${extraDecls.length ? extraDecls.join('\n\n') + '\n\n' : ''}${BUILD_HELPERS}
 ${instrumented}
-${hasMain ? '' : buildMain(fns, entryName, { nums, grid, text, usingVector }, extras)}`
+${hasMain ? '' : buildMain(fns, entryName, { nums, grid, text }, extras)}`
 
   if (process.env.DEBUG_CPP) console.log('=== SOURCE ===\n' + source)
   const srcPath = path.join(dir, 'main.cpp')

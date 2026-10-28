@@ -114,18 +114,20 @@
           <TableMatrix v-else-if="mode === 'matrix'" :step="current || {}" />
           <ArrayView v-else-if="mode === 'array'" :step="current || {}" />
 
-          <div v-if="steps.length && hasResult" class="result-badge" :class="{ final: isFinal }">
-            <span class="rb-label">{{ isFinal ? '程序返回' : '返回值' }}</span>
-            <span class="rb-value">{{ resultText }}</span>
-          </div>
-          <div v-else class="lab-vars-view">
+          <!-- 变量表与返回值牌互不排斥：画不出结构时看变量，有返回值时右上角再挂一块 -->
+          <div v-if="steps.length && mode === 'vars'" class="lab-vars-view">
             <div class="vars-table">
               <div v-for="(v, k) in current?.vars || {}" :key="k" class="vars-row">
                 <span class="vars-key">{{ k }}</span>
                 <span class="vars-val">{{ fmt(v) }}</span>
               </div>
             </div>
-            <p class="lab-empty-sub">这段代码里没有检测到数组，只能展示变量变化</p>
+            <p class="lab-empty-sub">没检测到可画的结构（数组 / 矩阵 / 树 / 链表），只能展示变量变化</p>
+          </div>
+
+          <div v-if="steps.length && hasResult" class="result-badge" :class="{ final: isFinal }">
+            <span class="rb-label">{{ isFinal ? '程序返回' : '返回值' }}</span>
+            <span class="rb-value">{{ resultText }}</span>
           </div>
         </div>
 
@@ -158,7 +160,16 @@
           </div>
 
           <div class="progress-wrap">
-            <div class="progress-track" @click="seek">
+            <div
+              class="progress-track"
+              role="slider"
+              tabindex="0"
+              aria-label="播放进度"
+              aria-valuemin="1"
+              :aria-valuemax="total"
+              :aria-valuenow="idx + 1"
+              @pointerdown="onPointerDown"
+            >
               <div class="progress-fill" :style="{ width: progressPct + '%' }"></div>
             </div>
             <span class="step-count">{{ idx + 1 }} / {{ total }}</span>
@@ -191,13 +202,14 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SoftBackground from '../components/SoftBackground.vue'
 import ArrayView from '../components/ArrayView.vue'
 import TreeView from '../components/TreeView.vue'
 import ListView from '../components/ListView.vue'
 import TableMatrix from '../components/TableMatrix.vue'
+import { useScrubber } from '../composables/useScrubber.js'
 import { runUserCode } from '../lab/runner.js'
 import { buildVisualSteps } from '../lab/adapter.js'
 import { explainLine } from '../lab/explain.js'
@@ -218,7 +230,6 @@ const user = ref(null)
 const toast = ref('')
 
 const env = ref(null)
-const envChecked = ref(false)
 
 const steps = ref([])
 const idx = ref(0)
@@ -431,7 +442,7 @@ function parseInput() {
   }
 
   // 参数名 = 数组：nums=[3,2,1], k=2
-  let body = norm.replace(/^\s*[A-Za-z_]\w*\s*=\s*(?=[\["'`])/, '')
+  const body = norm.replace(/^\s*[A-Za-z_]\w*\s*=\s*(?=[\["'`])/, '')
 
   // 先摘出数组 / 矩阵片段（保证里面的逗号不被当成参数分隔）
   const arrMatch = body.match(/\[[\s\S]*\]/)
@@ -679,12 +690,14 @@ function next() {
   if (idx.value < total.value - 1) idx.value++
 }
 
-function seek(e) {
-  const rect = e.currentTarget.getBoundingClientRect()
-  const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width))
-  idx.value = Math.round(ratio * (total.value - 1))
+/** 进度条拖到 r（0~1）就是第几帧 */
+function seekRatio(r) {
+  if (total.value <= 1) return
+  idx.value = Math.round(r * (total.value - 1))
   pause()
 }
+
+const { onPointerDown } = useScrubber(seekRatio)
 
 /** 返回值怎么显示：数字直接给，数组/链表/树摊开，对象转 JSON */
 function fmtResult(v) {
@@ -729,13 +742,6 @@ function onKey(e) {
   }
 }
 
-watch(
-  () => lang.value,
-  () => {
-    if (!currentSamples.value.length) return
-  }
-)
-
 onMounted(async () => {
   window.addEventListener('keydown', onKey)
 
@@ -756,7 +762,6 @@ onMounted(async () => {
   }
 
   env.value = await checkEnv()
-  envChecked.value = true
 })
 
 onBeforeUnmount(() => {

@@ -28,8 +28,6 @@ const props = defineProps({
 
 const body = ref(null)
 
-const KW = /\b(const|let|var|function|return|if|else|for|while|break|continue|new|of|in|true|false|null|undefined|Math|Array)\b/
-
 function escapeHtml(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }

@@ -159,8 +159,6 @@ export function buildInstrumented(source, options = {}) {
     return `__t(${line}, () => ({${props}}));`
   }
 
-  const skipSnap = new Set(['FunctionDeclaration', 'FunctionDeclaration2'])
-
   const handleList = (statements) => {
     for (const stmt of statements) {
       if (!stmt || !stmt.loc) continue
@@ -230,7 +228,6 @@ export function inferArgs(paramNames, input, kind = 'array', extras = {}) {
   const n = paramNames.length
   if (n === 0) return []
   const list = Array.isArray(input) ? input : []
-  const joined = paramNames.join(',').toLowerCase()
 
   const buildTree = (vals) => {
     if (!vals || !vals.length || vals[0] === null) return null

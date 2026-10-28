@@ -50,7 +50,18 @@ export async function runRemote({ lang, code, input, inputKind = 'array', inputR
 
   if (!r.ok) {
     const text = await r.text().catch(() => '')
-    return { ok: false, error: `执行服务返回 ${r.status}：${text.slice(0, 200)}` }
+    // 服务端错误也是 JSON（{ok:false, error:'...'}）：优先显示那句人话，
+    // 别把一整段 {"ok":false,...} 直接糊到错误面板里
+    let msg = ''
+    try {
+      msg = JSON.parse(text)?.error || ''
+    } catch {
+      /* 不是 JSON 就用原文 */
+    }
+    return {
+      ok: false,
+      error: msg || `执行服务返回 ${r.status}：${text.slice(0, 200)}`
+    }
   }
 
   try {

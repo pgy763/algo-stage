@@ -19,7 +19,6 @@ function layout(root) {
   const depthOf = (node) => (node ? 1 + Math.max(depthOf(node.left), depthOf(node.right)) : 0)
   const maxDepth = Math.max(depthOf(root), 1)
   const nodes = []
-  let rank = 0
   const walk = (node, depth) => {
     if (!node) return
     walk(node.left, depth + 1)
@@ -32,7 +31,6 @@ function layout(root) {
       y: 14 + (depth / maxDepth) * 72
     })
     node._viewId = nodes.length - 1
-    rank++
     walk(node.right, depth + 1)
   }
   // 先建视图 id
@@ -104,28 +102,6 @@ export default {
       line: 0,
       desc: `一棵已经建好的 BST（插入序 ${INIT.join(' → ')}）。看布局：中序从左到右正好是有序的 —— 这就是 BST 的灵魂。`
     })
-
-    /** 走路径并逐帧记录，返回走过的 key 列表 */
-    function walkPath(val) {
-      const walked = []
-      let cur = root
-      while (cur) {
-        walked.push(cur)
-        path.push(cur)
-        nodes = layout(root)
-        snap({
-          line: 3,
-          desc: `站在 ${cur.val}：${val} < ${cur.val} 往左，${val} > ${cur.val} 往右。`
-        })
-        if (val === cur.val) return { found: cur, walked }
-        cur = val < cur.val ? cur.left : cur.right
-        if (!cur) {
-          path.push(null)
-          snap({ line: 6, desc: `${val} < ${walked[walked.length - 1].val} ? 往这一侧走 —— 到头了，是个空位。` })
-        }
-      }
-      return { found: null, walked }
-    }
 
     // —— 插入 5 ——
     snap({ line: 8, desc: `第一件事：插入 5。BST 插入 = 先按查找的方式走，走到空位再安家。` })
