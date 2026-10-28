@@ -28,6 +28,13 @@ jobs:
       - name: Install
         run: npm ci
 
+      # 先过护栏再构建：lint 抓死代码 / 未定义变量，test 抓步骤协议越界
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
       - name: Build
         run: npm run build
 
@@ -36,6 +43,19 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+
+  # 执行服务会跑任意代码，来源校验坏了就等于把本机开放出去 —— 单独守着
+  runner-guards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 执行服务安全校验
+        run: node runner/test-guards.mjs
 
   deploy:
     needs: build

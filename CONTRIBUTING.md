@@ -67,13 +67,15 @@ export default {
 ## 提交前
 
 ```bash
+npm run lint      # 没有 error
+npm test          # 步骤协议 + adapter + 拖动逻辑
 npm run build     # 能构建
+
+npm run check     # 上面三步一次跑完
 ```
 
-内置算法想自查的话，用 Node 直接跑一遍 steps 生成：
-
-```bash
-node --input-type=module -e "import('./src/algorithms/index.js').then(m => m.algorithms.forEach(a => console.log(a.id, a.run(a.defaultInput).steps.length)))"
-```
+`npm test` 会自动把 `src/algorithms/` 里注册的每个算法都跑一遍，逐帧检查
+`line` 越界、指针/区间下标越界、矩阵各行不等宽这类"不报错但画出来不对"的问题 ——
+新算法只要注册了就会被覆盖，不用单独写测试。
 
 每个算法一个独立 commit（`feat: 添加 XX 算法`），方便 review。

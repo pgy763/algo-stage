@@ -5,9 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AlgoStage · 算法剧场</title>
     <meta name="description" content="把算法一行一行演给你看 —— 排序、二分、BFS、回溯、动态规划的可视化剧场" />
+
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="theme-color" content="#f8fbff" />
+
+    <!-- 分享出去时别只剩一条光秃秃的链接 -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AlgoStage · 算法剧场" />
+    <meta property="og:title" content="AlgoStage · 算法剧场" />
+    <meta
+      property="og:description"
+      content="左边是代码，当前执行到哪一行会亮起来，右边是数据结构在同步变化。排序、二分、BFS、回溯、DP 全都能一步步看。"
+    />
+    <meta property="og:image" content="./og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AlgoStage · 算法剧场" />
+    <meta name="twitter:description" content="把算法一行一行演给你看。" />
+    <meta name="twitter:image" content="./og.png" />
   </head>
   <body>
     <div id="app"></div>
+    <noscript>
+      <p style="font-family: system-ui, sans-serif; padding: 24px; line-height: 1.8">
+        AlgoStage 是一个算法可视化剧场，需要 JavaScript 才能播放。<br />
+        请在浏览器里允许 JavaScript，然后刷新这个页面。
+      </p>
+    </noscript>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

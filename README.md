@@ -24,7 +24,7 @@ AlgoStage 把执行过程摊开：左边是代码，**当前执行到哪一行�
 
 | | |
 | --- | --- |
-| 8 个内置算法 | 排序 / 查找 / 树 / 图搜索 / 回溯 / 动态规划全覆盖 |
+| 13 个内置算法 | 排序 / 查找 / 树 / 图搜索 / 回溯 / 动态规划全覆盖 |
 | **贴自己的代码** | 5 种语言 × 5 种形态，真编译真执行，逐行记录变量 |
 | 多参数输入 | 数组 + 标量一起传：`[3,2,1,5,6,4], k=2` |
 | AI 逐行解说（可选） | 接你自己的大模型，把每行翻成一句人话；没配 key 就用内置规则解说 |
@@ -117,20 +117,41 @@ npm start          # 默认 5199 端口，零第三方依赖
 {
   "python": { "ok": true, "detail": "Python 3（python）" },
   "cpp":    { "ok": true, "detail": "g++ (MinGW-W64) 16.2.0" },
-  "java":   { "ok": true, "detail": "JDK（javac）" }
+  "java":   { "ok": true, "detail": "JDK（javac 21.0.9）" }
 }
 ```
 
 前端会自动探测：没启动服务时只有 JavaScript 亮着，启动后其余语言自动可用。
+`ok` 是**真跑一次**工具链命令得出的（`javac -version` 之类），不是写死的。
 
-改完 runner 想确认没跑偏，三个自测脚本直接跑（前提是 runner 已启动）：
+**它默认只听 `127.0.0.1`。** 因为这个接口等于「在本机执行任意代码」：
+如果监听 `0.0.0.0`，同局域网的人就能往你机器上塞程序，你随手打开的某个网页也能通过
+CORS 直接调它。所以除了绑回环地址，服务还会校验请求头：
+
+- `Origin` 不在白名单（默认只有 `localhost:5175` / `:4173` / `:5199` 这几个本地开发端口）→ `403`
+- `Host` 不是本机名（DNS rebinding 的典型手法）→ `403`
+- 同一时刻最多 `MAX_CONCURRENT`（默认 4）个执行，超了返回 `429`
+
+把 runner 部署到服务器、让线上静态站调用时，才需要放开：
 
 ```bash
+# runner/.env
+HOST=0.0.0.0
+ALLOW_ORIGINS=https://pgy763.github.io
+ALLOW_HOSTS=runner.example.com
+```
+
+改完 runner 想确认没跑偏，四个自测脚本直接跑：
+
+```bash
+node test-guards.mjs      # 谁能调我：来源/Host 校验、白名单执行（自己拉临时实例，不用先启动）
 node test-samples.mjs     # 25 个内置示例，应该全 OK
 python test-matrix.py     # 语言 × 分类矩阵回归（26 例，见下表）
 python test-forms.py      # 链表 / 树 / 字符串 / 矩阵
 python test-runner.py     # 五种语言跑同一份冒泡，对比最终数组
 ```
+
+后三个需要 runner 已经启动；`test-guards.mjs` 自己起一个临时端口，改完安全逻辑先跑它。
 
 `test-matrix.py` 的覆盖范围（改了插桩或入口识别后必跑）：
 
@@ -313,6 +334,17 @@ npm run build        # 产物在 dist/
 npm run preview
 ```
 
+改代码前后建议跑一遍护栏（CI 里也是这三步）：
+
+```bash
+npm run lint         # ESLint：死代码、未定义变量、可疑比较
+npm test             # Vitest：13 个算法的步骤协议 + adapter 行为 + 进度条拖动
+npm run check        # lint + test + build 一条龙
+```
+
+> 仓库里还有一份 Prettier 配置（`.prettierrc.json`）。`npm run format` 会按它重排**整个仓库**，
+> 历史文件目前并不完全符合这套格式，所以它没接进 CI —— 想统一风格时再手动跑一次。
+
 ## 部署
 
 **GitHub Pages**（已配好自动化）：把仓库推到 GitHub，在 Settings → Pages 里把 Source 选成 **GitHub Actions**，之后每次 push 到 `main` 都会自动构建发布。
@@ -377,6 +409,10 @@ export default {
 | `rows` `badges` | `{name, vals}[]` | 链表视图（多条链 + 指针标签） |
 | `matrix` `cell` | `number[][]` / `[r,c]` | 矩阵视图（DP 表） |
 
+写完 `run()` 直接 `npm test`：测试会按上面这张表逐帧检查你注册的算法
+（`line` 是否越界、指针/区间下标是否落在数组里、矩阵每行是否等宽、树节点坐标是否齐全）。
+这类错误在页面上只会"看着怪"，不会报错，交给测试兜最省事。
+
 ## 参与贡献
 
 最欢迎的贡献就是**新算法**：一个文件 + 一行注册，不需要碰框架代码。完整步骤、step 字段协议和写旁白的建议都在 [CONTRIBUTING.md](CONTRIBUTING.md)，十分钟就能上手。
@@ -395,6 +431,8 @@ export default {
 ```
 src/
 ├── algorithms/          # 内置算法：代码 + 步骤生成器
+├── composables/
+│   └── useScrubber.js   # 进度条拖动（Pointer Events，鼠标/触屏通用）
 ├── lab/                 # 代码实验台
 │   ├── instrument.js    # JS AST 插桩
 │   ├── labWorker.js     # 浏览器沙箱执行
@@ -408,6 +446,7 @@ src/
 │   ├── GridView.vue     # 二维网格（迷宫 / 棋盘）
 │   ├── TreeView.vue     # SVG 连线 + 节点
 │   └── CodePanel.vue    # 代码高亮 + 当前行跟随
+├── test/                # Vitest：算法步骤契约 + adapter 行为
 └── views/
     ├── HomeView.vue     # 首页
     ├── AlgoView.vue     # 内置算法舞台
@@ -417,6 +456,7 @@ src/
 
 runner/                  # 多语言执行服务（Node，零依赖）
 ├── server.js
+├── test-guards.mjs      # 自测：来源 / Host 校验、白名单执行
 └── langs/
     ├── py_tracer.py     # sys.settrace 追踪
     ├── trace.hpp        # C/C++ 追踪头文件（模板探针识别链表/树）
@@ -446,7 +486,7 @@ runner/                  # 多语言执行服务（Node，零依赖）
 - Python / C / C++ / Java 需要本地 runner；线上静态站只有 JavaScript 可用。
 - C 代码实际是用 `g++` 以 C++17 编译的（能跑绝大多数 C 代码，但严格的 C 语义差异不保证）。
 - 支持"一个主数据结构 + 若干标量参数"；两个数组、两个链表这类多结构入参只会给第一个传数据。
-- 内置的 8 个算法是预置步骤；实验台走的是动态插桩，两者共用同一套播放器和渲染组件。
+- 内置的 13 个算法是预置步骤；实验台走的是动态插桩，两者共用同一套播放器和渲染组件。
 - 移动端布局可用，但数组很长时会出现横向滚动。
 
 ## License
