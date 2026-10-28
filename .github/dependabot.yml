@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # 前端依赖：每周看一眼，别让 Vue / Vite 落后太多
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore(deps)'
+    groups:
+      dev-dependencies:
+        dependency-type: development
+
+  # Actions 本身也会过期
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: 'chore(ci)'

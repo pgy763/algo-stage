@@ -2,6 +2,12 @@
 
 > 把算法一行一行演给你看。
 
+[![部署状态](https://github.com/pgy763/algo-stage/actions/workflows/deploy.yml/badge.svg)](https://github.com/pgy763/algo-stage/actions/workflows/deploy.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Vue 3.5](https://img.shields.io/badge/Vue-3.5-42b883?logo=vuedotjs&logoColor=white)](https://vuejs.org/)
+[![Vite 5](https://img.shields.io/badge/Vite-5-646cff?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 排序时哪两个数在比较、指针挪到哪了、回溯在哪一步撤销、DP 表是怎么一格一格填满的、链表指针是怎么翻转的 —— 全部画出来，跟着代码一起走。
 
 **支持 5 种语言（JavaScript / Python / C / C++ / Java）× 5 种数据结构形态（数组 / 字符串 / 矩阵 / 二叉树 / 链表）**
