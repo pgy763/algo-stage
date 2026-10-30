@@ -999,6 +999,60 @@ button {
   pointer-events: none;
 }
 
+.tree-edge {
+  stroke: rgba(15, 23, 42, 0.15);
+  stroke-width: 1.5;
+}
+
+.tree-edge.done {
+  stroke: rgba(16, 185, 129, 0.55);
+}
+
+/* 有向边上的 V 形箭头（拓扑排序用） */
+.tree-arrow {
+  fill: none;
+  stroke: rgba(15, 23, 42, 0.35);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tree-arrow.done {
+  stroke: rgba(16, 185, 129, 0.7);
+}
+
+/* 节点右上角的小角标：拓扑排序用它显示入度 */
+.tree-sub {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: #eef2f7;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  color: #64748b;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 15px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.tree-sub.zero {
+  background: #d1fae5;
+  border-color: rgba(16, 185, 129, 0.45);
+  color: #047857;
+}
+
+.tree-node.current .tree-sub {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(146, 64, 14, 0.25);
+  color: #92400e;
+}
+
 .tree-node {
   position: absolute;
   width: 40px;
