@@ -16,6 +16,7 @@ import unionFind from './unionFind.js'
 import lis from './lis.js'
 import editDistance from './editDistance.js'
 import trie from './trie.js'
+import topologicalSort from './topologicalSort.js'
 
 /** 新算法只要在这里注册一下就能出现在首页 */
 export const algorithms = [
@@ -32,6 +33,7 @@ export const algorithms = [
   kmp,
   bfs,
   dijkstra,
+  topologicalSort,
   nqueens,
   lcs,
   lis,
