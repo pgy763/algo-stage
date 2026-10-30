@@ -331,10 +331,72 @@ button {
 .algo-page > .topbar,
 .algo-page > .stage-layout,
 .algo-page > .lab-layout,
+.algo-page > .next-up,
 .algo-page > .works-body,
 .auth-page > .auth-card {
   position: relative;
   z-index: 1;
+}
+
+/* 看完之后接着看下一个：只在最后一帧露出来，学习中段不打扰 */
+.next-up {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 24px 22px;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(8, 145, 178, 0.28);
+  background: linear-gradient(120deg, rgba(8, 145, 178, 0.07), rgba(99, 102, 241, 0.06));
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  animation: fadeIn 0.28s ease both;
+}
+
+.next-up:hover {
+  transform: translateY(-2px);
+  border-color: rgba(8, 145, 178, 0.5);
+  box-shadow: var(--shadow-md);
+}
+
+.next-label {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.next-body {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.next-body strong {
+  font-size: 15px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.next-body em {
+  font-style: normal;
+  font-size: 12.5px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.next-arrow {
+  margin-left: auto;
+  font-size: 16px;
+  color: var(--accent);
 }
 
 .topbar {
