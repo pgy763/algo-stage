@@ -78,6 +78,16 @@
       </div>
     </div>
 
+    <!-- 看完了接着看下一个（只在最后一帧出现） -->
+    <router-link v-if="atEnd && nextAlgo" :to="`/algo/${nextAlgo.id}`" class="next-up">
+      <span class="next-label">{{ isLastAlgo ? '全部看完了 · 回到第一个' : '看完了 · 接着看' }}</span>
+      <span class="next-body">
+        <strong>{{ nextAlgo.name }}</strong>
+        <em>{{ nextAlgo.summary }}</em>
+      </span>
+      <span class="next-arrow">→</span>
+    </router-link>
+
     <!-- 快捷键帮助（按 ? 呼出） -->
     <div v-if="showKeys" class="keys-mask" @click.self="showKeys = false">
       <div class="keys-panel">
@@ -96,7 +106,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { markWatched } from '../progress.js'
 import { useRoute, useRouter } from 'vue-router'
-import { byId } from '../algorithms/index.js'
+import { algorithms, byId } from '../algorithms/index.js'
 import SoftBackground from '../components/SoftBackground.vue'
 import CodePanel from '../components/CodePanel.vue'
 import ArrayView from '../components/ArrayView.vue'
@@ -120,6 +130,16 @@ const showKeys = ref(false)
 
 const total = computed(() => steps.value.length)
 const current = computed(() => steps.value[idx.value] || null)
+
+// ---- 看完了接着看下一个 ----
+// 只在最后一帧露出来：学习中段弹「下一篇」会把人带跑
+const algoIndex = computed(() => algorithms.findIndex((a) => a.id === algo.value?.id))
+const isLastAlgo = computed(() => algoIndex.value === algorithms.length - 1)
+const nextAlgo = computed(() => {
+  if (algoIndex.value < 0) return null
+  return algorithms[(algoIndex.value + 1) % algorithms.length]
+})
+const atEnd = computed(() => total.value > 1 && idx.value >= total.value - 1)
 
 // 看到最后一帧就算「已学」，首页卡片会打勾
 watch(idx, (v) => {
