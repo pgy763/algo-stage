@@ -28,7 +28,7 @@
             <router-link to="/lab" class="btn">贴自己的代码试试</router-link>
           </div>
           <div class="hero-hint">
-            免安装 · 免登录 · 键盘 ← → 单步 · 空格播放 · 也可以把<router-link to="/lab" style="color: var(--accent)">自己的代码</router-link>贴进来
+            免安装 · 免登录 · 键盘 ← → 单步 · 空格播放 · 按 <code>/</code> 直接搜算法 · 也可以把<router-link to="/lab" style="color: var(--accent)">自己的代码</router-link>贴进来
           </div>
         </div>
 
@@ -74,6 +74,18 @@
         >
           {{ c }}
         </button>
+
+        <div class="search-box">
+          <input
+            ref="searchInput"
+            v-model="q"
+            type="search"
+            class="search-input"
+            placeholder="搜算法 / 类别 / 复杂度"
+            aria-label="搜索算法"
+          />
+          <button v-if="q" class="search-clear" aria-label="清空搜索" @click="q = ''">×</button>
+        </div>
       </div>
 
       <div class="algo-grid">
@@ -99,6 +111,13 @@
         </router-link>
       </div>
 
+      <div v-if="!filtered.length" class="algo-empty">
+        <p>
+          没有匹配「{{ q }}」的算法<template v-if="activeCat !== '全部'">（分类：{{ activeCat }}）</template>
+        </p>
+        <button class="btn" @click="clearFilters">清空筛选</button>
+      </div>
+
       <footer class="home-foot">
         <span>AlgoStage · 用 Vue 3 手写的算法可视化，零依赖渲染</span>
         <span class="mono">{{ algorithms.length }} algorithms · MIT</span>
@@ -110,6 +129,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { algorithms, categories } from '../algorithms/index.js'
+import { filterAlgorithms } from '../algorithms/filter.js'
 import { loadWatched } from '../progress.js'
 import SoftBackground from '../components/SoftBackground.vue'
 import { currentUser } from '../store/auth.js'
@@ -118,9 +138,30 @@ const activeCat = ref('全部')
 const watched = ref(loadWatched())
 const watchedCount = computed(() => algorithms.filter((a) => watched.value.has(a.id)).length)
 const user = ref(currentUser())
-const filtered = computed(() =>
-  activeCat.value === '全部' ? algorithms : algorithms.filter((a) => a.category === activeCat.value)
-)
+
+// ---- 搜索 ----
+const q = ref('')
+const searchInput = ref(null)
+const filtered = computed(() => filterAlgorithms(algorithms, activeCat.value, q.value))
+
+function clearFilters() {
+  q.value = ''
+  activeCat.value = '全部'
+}
+
+function onKey(e) {
+  const tag = (e.target?.tagName || '').toLowerCase()
+  const typing = tag === 'input' || tag === 'textarea' || e.target?.isContentEditable
+  // 「/」聚焦搜索框：浏览时手不用离开键盘
+  if (e.key === '/' && !typing) {
+    e.preventDefault()
+    searchInput.value?.focus()
+    return
+  }
+  if (e.key === 'Escape' && typing && q.value) {
+    q.value = ''
+  }
+}
 
 // ---- 首页迷你演示 ----
 const demoArr = ref([5, 3, 8, 1, 9, 2, 7, 4])
@@ -159,8 +200,12 @@ function demoStep() {
 
 onMounted(() => {
   timer = setInterval(demoStep, 620)
+  window.addEventListener('keydown', onKey)
 })
-onBeforeUnmount(() => clearInterval(timer))
+onBeforeUnmount(() => {
+  clearInterval(timer)
+  window.removeEventListener('keydown', onKey)
+})
 </script>
 
 <style scoped>
@@ -199,6 +244,69 @@ onBeforeUnmount(() => clearInterval(timer))
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 18px;
+}
+
+/* ---- 搜索框 ---- */
+.search-box {
+  position: relative;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 240px;
+  padding: 7px 30px 7px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--panel);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  outline: none;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s;
+}
+
+.search-input::placeholder {
+  color: var(--dim);
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.search-clear {
+  position: absolute;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: var(--border);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.search-clear:hover {
+  background: var(--border-strong);
+  color: var(--text);
+}
+
+.algo-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 48px 0 56px;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .filters .tag {
@@ -311,6 +419,17 @@ onBeforeUnmount(() => clearInterval(timer))
   .hero {
     grid-template-columns: 1fr;
     gap: 34px;
+  }
+
+  /* 窄屏时搜索框独占一行，不然会和分类标签挤在一起 */
+  .search-box {
+    margin-left: 0;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .search-input {
+    width: 100%;
   }
 }
 </style>
