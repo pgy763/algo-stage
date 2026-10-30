@@ -110,6 +110,20 @@ describe.each(algorithms.map((a) => [a.id, a]))('算法 %s', (id, algo) => {
         for (const n of step.nodes) {
           expect(Number.isFinite(n.x), `${at}: 节点缺 x`).toBe(true)
           expect(Number.isFinite(n.y), `${at}: 节点缺 y`).toBe(true)
+          // 角标（拓扑排序用来画入度）必须是数字，否则会被渲染成 "undefined"
+          if (n.sub != null) {
+            expect(Number.isFinite(n.sub), `${at}: 节点 ${n.id} 的角标 sub 不是数字`).toBe(true)
+            expect(n.sub, `${at}: 节点 ${n.id} 的角标 sub 是负数`).toBeGreaterThanOrEqual(0)
+          }
+        }
+
+        // 显式边（有向图）：两端都必须是真实节点 id，且不能自环
+        if (Array.isArray(step.edges) && step.edges.length) {
+          for (const e of step.edges) {
+            expect(ids.has(e.from), `${at}: 边起点 ${e.from} 不在 nodes 里`).toBe(true)
+            expect(ids.has(e.to), `${at}: 边终点 ${e.to} 不在 nodes 里`).toBe(true)
+            expect(e.from, `${at}: 出现自环 ${e.from} → ${e.to}`).not.toBe(e.to)
+          }
         }
       }
     })
